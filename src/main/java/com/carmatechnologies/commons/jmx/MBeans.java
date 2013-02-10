@@ -49,13 +49,13 @@ public final class MBeans {
 	private static final Collection<ObjectName> OBJECT_NAMES = new ConcurrentLinkedQueue<ObjectName>();
 	private static final Joiner.MapJoiner JOINER = Joiner.on(",").withKeyValueSeparator("=");
 
-	public synchronized static ObjectName register(final Object mbean) throws InstanceAlreadyExistsException, MBeanRegistrationException,
+	public static synchronized ObjectName register(final Object mbean) throws InstanceAlreadyExistsException, MBeanRegistrationException,
 			NotCompliantMBeanException, MalformedObjectNameException {
 		checkNotNull(mbean, "MBean must NOT be null.");
 		return register(new Builder(mbean));
 	}
 
-	public synchronized static ObjectName register(final Builder builder) throws InstanceAlreadyExistsException, MBeanRegistrationException,
+	public static synchronized ObjectName register(final Builder builder) throws InstanceAlreadyExistsException, MBeanRegistrationException,
 			NotCompliantMBeanException, MalformedObjectNameException {
 		checkNotNull(builder, "MBean builder must NOT be null.");
 		final ObjectName objectName = new ObjectName(builder.objectName());
@@ -112,7 +112,7 @@ public final class MBeans {
 		}
 	}
 
-	public static class Builder {
+	public static final class Builder {
 		private static final String TYPE = "type";
 		private final Map<String, String> properties = new LinkedHashMap<String, String>();
 		private Object mbean;
