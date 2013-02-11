@@ -17,6 +17,7 @@ package com.carmatechnologies.commons.jmx;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import org.junit.Test;
 
@@ -26,67 +27,83 @@ public class MBeansBuilderTest {
 	@Test
 	public void creatingObjectNameFromMBeanShouldUseDefaultPackageAndType() {
 		Builder builder = new Builder("A");
-		
+
 		assertThat(builder.objectName(), is("java.lang:type=String"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test
 	public void creatingObjectNameFromMBeanAndPackageNameShouldUseProvidedPackageAndDefaultType() {
-		Builder builder = new Builder("A")
-				.packageName("my.custom.package");
-		
+		Builder builder = new Builder("A").packageName("my.custom.package");
+
 		assertThat(builder.objectName(), is("my.custom.package:type=String"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test
 	public void creatingObjectNameFromMBeanAndTypeShouldUseProvidedTypeAndDefaultPackage() {
-		Builder builder = new Builder("A")
-				.type("SuperString");
-		
+		Builder builder = new Builder("A").type("SuperString");
+
 		assertThat(builder.objectName(), is("java.lang:type=SuperString"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test
 	public void creatingObjectNameFromMBeanAndPackageNameAndTypeShouldUseProvidedValues() {
-		Builder builder = new Builder("A")
-				.packageName("my.custom.package")
-				.type("SuperString");
-		
+		Builder builder = new Builder("A").packageName("my.custom.package").type("SuperString");
+
 		assertThat(builder.objectName(), is("my.custom.package:type=SuperString"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test
 	public void creatingObjectNameFromMBeanAndPropertyShouldUseDefaultPackageAndTypeAndProvidedProperty() {
-		Builder builder = new Builder("A")
-				.property("group", "Vowels");
-		
+		Builder builder = new Builder("A").property("group", "Vowels");
+
 		assertThat(builder.objectName(), is("java.lang:type=String,group=Vowels"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test
 	public void creatingObjectNameFromMBeanAndPropertiesShouldUseAllProvidedPropertiesInTheOrderTheyAreAdded() {
-		Builder builder = new Builder("A")
-				.packageName("my.custom.package")
-				.type("SuperString")
-				.property("name", "MySuperA")
-				.property("group", "Vowels");
+		Builder builder = new Builder("A").packageName("my.custom.package").type("SuperString").property("name", "MySuperA").property("group", "Vowels");
 
 		assertThat(builder.objectName(), is("my.custom.package:type=SuperString,name=MySuperA,group=Vowels"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test
 	public void creatingObjectNameFromMBeanAndPropertyWithDisabledTypeShouldUseProvidedPropertyAndRemoveType() {
-		Builder builder = new Builder("A")
-				.packageName("my.custom.package")
-				.property("name", "MySuperA")
-				.disableType();
+		Builder builder = new Builder("A").packageName("my.custom.package").property("name", "MySuperA").disableType();
 
 		assertThat(builder.objectName(), is("my.custom.package:name=MySuperA"));
+		assertThat((String) builder.mbean(), is("A"));
+	}
+
+	@Test
+	public void creatingObjectNameShouldUseDefaultPackageAndType() {
+		Builder builder = new Builder();
+
+		assertThat(builder.objectName(), is("default:type=Object"));
+		assertThat(builder.mbean(), is(nullValue()));
+	}
+
+	@Test
+	public void creatingObjectNameFromMBeanUsingBuilderSetterShouldUseDefaultPackageAndType() {
+		Builder builder = new Builder().mbean("A");
+
+		assertThat(builder.objectName(), is("java.lang:type=String"));
+		assertThat((String) builder.mbean(), is("A"));
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void createObjectNameFromNullMBeanThrowsNullPointerException() {
 		new Builder(null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void createObjectNameFromNullMBeanUsingBuilderSetterThrowsNullPointerException() {
+		new Builder().mbean(null);
 	}
 
 	@Test(expected = NullPointerException.class)

@@ -39,11 +39,13 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 
 public final class MBeans {
+	private static final String DEFAULT_TYPE = "Object";
 
 	private MBeans() {
 		// Pure utility class, do NOT instantiate.
 	}
 
+	private static final String DEFAULT_PACKAGE = "default";
 	private static final Logger LOGGER = LoggerFactory.getLogger(MBeans.class);
 	private static final MBeanServer MBEAN_SERVER = ManagementFactory.getPlatformMBeanServer();
 	private static final Collection<ObjectName> OBJECT_NAMES = new ConcurrentLinkedQueue<ObjectName>();
@@ -66,12 +68,15 @@ public final class MBeans {
 	}
 
 	private static String getType(final Object mbean) {
-		return (mbean == null) ? "Object" : mbean.getClass().getSimpleName();
+		return (mbean == null) ? DEFAULT_TYPE : mbean.getClass().getSimpleName();
 	}
 
 	private static String getPackageName(final Object mbean) {
+		if (mbean == null)
+			return DEFAULT_PACKAGE;
+
 		final Package mbeanPackage = mbean.getClass().getPackage();
-		return (mbeanPackage == null) ? "default" : mbeanPackage.getName();
+		return (mbeanPackage == null) ? DEFAULT_PACKAGE : mbeanPackage.getName();
 	}
 
 	private static String getObjectName(final String packageName, final Map<String, String> properties) {
@@ -120,6 +125,7 @@ public final class MBeans {
 		private String packageName;
 
 		public Builder() {
+			properties.put(TYPE, DEFAULT_TYPE);
 		}
 
 		public Builder(final Object mbean) {
