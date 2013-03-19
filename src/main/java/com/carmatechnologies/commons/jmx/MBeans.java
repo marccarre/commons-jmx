@@ -17,14 +17,12 @@ package com.carmatechnologies.commons.jmx;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -32,10 +30,8 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Joiner;
 
 public final class MBeans {
@@ -50,6 +46,11 @@ public final class MBeans {
 	private static final MBeanServer MBEAN_SERVER = ManagementFactory.getPlatformMBeanServer();
 	private static final Collection<ObjectName> OBJECT_NAMES = new ConcurrentLinkedQueue<ObjectName>();
 	private static final Joiner.MapJoiner JOINER = Joiner.on(",").withKeyValueSeparator("=");
+
+	public static String getJmxPort() {
+		final String port = System.getProperty("com.sun.management.jmxremote.port");
+		return (port == null || port.isEmpty()) ? "N/A" : port;
+	}
 
 	public static synchronized ObjectName register(final Object mbean) throws InstanceAlreadyExistsException, MBeanRegistrationException,
 			NotCompliantMBeanException, MalformedObjectNameException {
@@ -123,6 +124,7 @@ public final class MBeans {
 		private Object mbean;
 		private String mbeanType;
 		private String packageName;
+		private boolean disabledType = false;
 
 		public Builder() {
 			properties.put(TYPE, DEFAULT_TYPE);
@@ -140,8 +142,10 @@ public final class MBeans {
 
 		private void setMBean(final Object mbean) {
 			this.mbean = mbean;
-			mbeanType = getType(mbean);
-			properties.put(TYPE, mbeanType);
+			if (!disabledType) {
+				mbeanType = getType(mbean);
+				properties.put(TYPE, mbeanType);
+			}
 		}
 
 		public Builder packageName(final String packageName) {
@@ -153,7 +157,11 @@ public final class MBeans {
 
 		public Builder type(final String type) {
 			checkNotNull(type, "Type for '" + mbeanType + "' must NOT be null.");
-			checkArgument(!type.isEmpty(), "Type for '" + mbeanType + "' must NOT be empty.");
+			checkArgument(type.isEmpty() == false, "Type for '" + mbeanType + "' must NOT be empty.");
+
+			if (disabledType)
+				throw new UnsupportedOperationException("Type can't be set once it has been disabled.");
+
 			properties.put(TYPE, type);
 			return this;
 		}
@@ -163,6 +171,10 @@ public final class MBeans {
 			checkArgument(!key.isEmpty(), "Custom property for '" + mbeanType + "' must NOT be empty.");
 			checkNotNull(value, "Value for '" + key + "' on '" + mbeanType + "' must NOT be null.");
 			checkArgument(!value.isEmpty(), "Value for '" + key + "' on '" + mbeanType + "' must NOT be empty.");
+
+			if (disabledType && key.equals(TYPE))
+				throw new UnsupportedOperationException("Type can't be set once it has been disabled.");
+
 			properties.put(key, value);
 			return this;
 		}
@@ -170,6 +182,7 @@ public final class MBeans {
 		public Builder disableType() {
 			properties.remove(TYPE);
 			checkArgument(!properties.isEmpty(), "Make sure you add other properties before you disable 'type' on '" + mbeanType + "'.");
+			disabledType = true;
 			return this;
 		}
 

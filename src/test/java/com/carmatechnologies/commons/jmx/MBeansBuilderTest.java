@@ -18,9 +18,7 @@ package com.carmatechnologies.commons.jmx;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-
 import org.junit.Test;
-
 import com.carmatechnologies.commons.jmx.MBeans.Builder;
 
 public class MBeansBuilderTest {
@@ -77,6 +75,37 @@ public class MBeansBuilderTest {
 		Builder builder = new Builder("A").packageName("my.custom.package").property("name", "MySuperA").disableType();
 
 		assertThat(builder.objectName(), is("my.custom.package:name=MySuperA"));
+		assertThat((String) builder.mbean(), is("A"));
+	}
+
+	@Test
+	public void creatingObjectNameFromMBeanAndPropertyWithDisabledTypeShouldUseProvidedPropertyAndRemoveTypeEvenIfMBeanIsAddedAfterBuilderCreation() {
+		Builder builder = new Builder().packageName("my.custom.package").property("name", "MySuperA").disableType();
+		builder.mbean("A");
+
+		assertThat(builder.objectName(), is("my.custom.package:name=MySuperA"));
+		assertThat((String) builder.mbean(), is("A"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void createObjectNameFromMBeanAndDisabledTypeWithoutAnyOtherPropertyThrowsIllegalArgumentException() {
+		new Builder("A").disableType();
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void addingTypeAfterHavingDisabledItShouldThrowUnsupportedOperationException() {
+		new Builder("A").property("name", "MySuperA").disableType().type("SuperString");
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void addingTypeUsingPropertyAfterHavingDisabledItShouldThrowUnsupportedOperationException() {
+		new Builder("A").property("name", "MySuperA").disableType().property("type", "SuperString");
+	}
+
+	@Test
+	public void addingPropertyAfterHavingDisabledTypeShouldGenerateExpectedObjectName() {
+		Builder builder = new Builder("A").property("name", "MySuperA").disableType().property("group", "Vowels");
+		assertThat(builder.objectName(), is("java.lang:name=MySuperA,group=Vowels"));
 		assertThat((String) builder.mbean(), is("A"));
 	}
 
@@ -144,10 +173,5 @@ public class MBeansBuilderTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void createObjectNameFromMBeanAndPropertyValueThrowsIllegalArgumentException() {
 		new Builder("A").property("foo", "");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void createObjectNameFromMBeanAndDisabledTypeWithoutAnyOtherPropertyThrowsIllegalArgumentException() {
-		new Builder("A").disableType();
 	}
 }
