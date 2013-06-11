@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@ package com.carmatechnologies.commons.jmx;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.management.ObjectName;
@@ -95,6 +98,29 @@ public class JmxLinkedBlockingQueueTest extends AbstractJmxTest {
 		assertThat(jmxQueue.poll(), is("A"));
 		assertThat(jmxQueue.poll(), is("B"));
 		assertThat(jmxQueue.poll(), is("C"));
+	}
+
+	@Test
+	public void getItemsOnAJmxQueueShouldExposeTheContentOfTheDecoratedQueueAsTabularData() throws Exception {
+		LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+		JmxLinkedBlockingQueue<String> jmxQueue = new JmxLinkedBlockingQueue<String>(queue, new Builder().packageName("my.custom.package"));
+		jmxQueue.put("A");
+		jmxQueue.put("B");
+		jmxQueue.put("C");
+
+		objectName = jmxQueue.objectName();
+		assertThat(mbeanServer.isRegistered(objectName), is(true));
+		assertThat(mbeanServer.getAttribute(objectName, "Items"), is(not(nullValue())));
+
+		List<String> items = jmxQueue.getItems();
+		assertThat(items, is(not(nullValue())));
+		assertThat(items.size(), is(3));
+		assertThat(items.get(0), is("A"));
+		assertThat(items.get(1), is("B"));
+		assertThat(items.get(2), is("C"));
+
+		assertThat(jmxClient.isRegistered(objectName), is(true));
+		assertThat(jmxClient.getAttribute(objectName, "Items"), is(not(nullValue())));
 	}
 
 	@Test(expected = NullPointerException.class)

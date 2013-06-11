@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@ package com.carmatechnologies.commons.jmx;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -30,8 +34,10 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 
 public final class MBeans {
@@ -50,6 +56,18 @@ public final class MBeans {
 	public static String getJmxPort() {
 		final String port = System.getProperty("com.sun.management.jmxremote.port");
 		return (port == null || port.isEmpty()) ? "N/A" : port;
+	}
+
+	public static String getJmxIpPort() {
+		return getIpAddress() + ":" + getJmxPort();
+	}
+
+	private static String getIpAddress() {
+		try {
+			return InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			throw new RuntimeException("Failed to get current host's IP address.", e);
+		}
 	}
 
 	public static synchronized ObjectName register(final Object mbean) throws InstanceAlreadyExistsException, MBeanRegistrationException,

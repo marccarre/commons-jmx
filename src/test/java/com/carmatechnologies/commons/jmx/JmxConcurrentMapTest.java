@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 package com.carmatechnologies.commons.jmx;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.management.ObjectName;
+import javax.management.openmbean.TabularDataSupport;
 
 import org.junit.After;
 import org.junit.Test;
@@ -96,6 +98,35 @@ public class JmxConcurrentMapTest extends AbstractJmxTest {
 
 		assertThat(jmxClient.isRegistered(objectName), is(true));
 		assertThat(Integer.parseInt(jmxClient.getAttribute(objectName, "Size").toString()), is(3));
+	}
+
+	@Test
+	public void getItemsOnAJmxMapShouldExposeTheContentOfTheDecoratedMapAsTabularData() throws Exception {
+		ConcurrentMap<String, Integer> map = new ConcurrentHashMap<String, Integer>();
+		JmxConcurrentMap<String, Integer> jmxMap = new JmxConcurrentMap<String, Integer>(map, new Builder().packageName("my.custom.package"));
+		jmxMap.put("A", 1);
+		jmxMap.put("B", 2);
+		jmxMap.put("C", 3);
+
+		objectName = jmxMap.objectName();
+		assertThat(mbeanServer.isRegistered(objectName), is(true));
+
+		TabularDataSupport serverItems = (TabularDataSupport) mbeanServer.getAttribute(objectName, "Items");
+		assertThat(serverItems.size(), is(3));
+
+		String keys = serverItems.keySet().toString();
+		assertThat(keys, containsString("A"));
+		assertThat(keys, containsString("B"));
+		assertThat(keys, containsString("C"));
+
+		String values = serverItems.values().toString();
+		assertThat(values, containsString("{key=A, value=1}"));
+		assertThat(values, containsString("{key=B, value=2}"));
+		assertThat(values, containsString("{key=C, value=3}"));
+
+		assertThat(jmxClient.isRegistered(objectName), is(true));
+		TabularDataSupport clientItems = (TabularDataSupport) jmxClient.getAttribute(objectName, "Items");
+		assertThat(clientItems, is(serverItems));
 	}
 
 	@Test(expected = NullPointerException.class)

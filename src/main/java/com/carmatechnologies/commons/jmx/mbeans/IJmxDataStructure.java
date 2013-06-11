@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import javax.management.MXBean;
 import javax.management.ObjectName;
 
 @MXBean
-public interface IJmxCollection {
+public interface IJmxDataStructure {
 	ObjectName objectName();
 
 	int getSize();

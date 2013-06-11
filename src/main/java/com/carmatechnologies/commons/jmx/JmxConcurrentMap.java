@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.carmatechnologies.commons.jmx;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -29,9 +30,9 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import com.carmatechnologies.commons.jmx.MBeans.Builder;
-import com.carmatechnologies.commons.jmx.mbeans.IJmxCollection;
+import com.carmatechnologies.commons.jmx.mbeans.IJmxMap;
 
-public class JmxConcurrentMap<K, V> implements ConcurrentMap<K, V>, IJmxCollection {
+public class JmxConcurrentMap<K, V> implements ConcurrentMap<K, V>, IJmxMap {
 	private final ConcurrentMap<K, V> map;
 	private final ObjectName objectName;
 
@@ -141,5 +142,14 @@ public class JmxConcurrentMap<K, V> implements ConcurrentMap<K, V>, IJmxCollecti
 	@Override
 	public ObjectName objectName() {
 		return objectName;
+	}
+
+	@Override
+	public Map<String, String> getItems() {
+		final Map<String, String> items = new LinkedHashMap<String, String>();
+		for (final Entry<K, V> kvp : map.entrySet()) {
+			items.put(kvp.getKey().toString(), kvp.getValue().toString());
+		}
+		return items;
 	}
 }

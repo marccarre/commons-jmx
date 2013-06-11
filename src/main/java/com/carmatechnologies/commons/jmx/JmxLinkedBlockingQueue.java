@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@ package com.carmatechnologies.commons.jmx;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,9 +33,9 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import com.carmatechnologies.commons.jmx.MBeans.Builder;
-import com.carmatechnologies.commons.jmx.mbeans.IJmxCollection;
+import com.carmatechnologies.commons.jmx.mbeans.IJmxSequence;
 
-public class JmxLinkedBlockingQueue<E> extends LinkedBlockingQueue<E> implements Iterable<E>, Collection<E>, BlockingQueue<E>, Queue<E>, IJmxCollection {
+public class JmxLinkedBlockingQueue<E> extends LinkedBlockingQueue<E> implements Iterable<E>, Collection<E>, BlockingQueue<E>, Queue<E>, IJmxSequence {
 	private static final long serialVersionUID = 2961777229338139054L;
 
 	private final LinkedBlockingQueue<E> queue;
@@ -190,5 +192,14 @@ public class JmxLinkedBlockingQueue<E> extends LinkedBlockingQueue<E> implements
 	@Override
 	public int getSize() {
 		return queue.size();
+	}
+
+	@Override
+	public List<String> getItems() {
+		final List<String> items = new ArrayList<String>();
+		for (final E item : queue) {
+			items.add(item.toString());
+		}
+		return items;
 	}
 }

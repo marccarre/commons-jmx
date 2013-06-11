@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2013 Marc CARRE
+ * Copyright 2013 Marc CARRE (https://github.com/marccarre/commons-jmx)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,28 @@ public class MBeansTest extends AbstractJmxTest {
 		MBeans.unregisterAll();
 		objectName = MBeans.register(new Builder(mbean1).property("name", "1stLevel"));
 		objectName = MBeans.register(new Builder(mbean2).property("name", "2ndLevel"));
+	}
+
+	@Test
+	public void getJmxPortWhenSystemNotSetUpShouldDefaultToNotAvailable() {
+		assertThat(MBeans.getJmxPort(), is("N/A"));
+	}
+
+	@Test
+	public void getJmxPortWhenSystemIsSetUpShouldReturnJmxPort() {
+		System.setProperty("com.sun.management.jmxremote.port", "1337");
+		assertThat(MBeans.getJmxPort(), is("1337"));
+	}
+
+	@Test
+	public void getJmxIpPortWhenSystemNotSetUpShouldReturnIpAndNotAvailable() {
+		assertThat(MBeans.getJmxIpPort().matches("[0-9]+.[0-9]+.[0-9]+.[0-9]+:N/A"), is(true));
+	}
+
+	@Test
+	public void getJmxIpPortWhenSystemIsSetUpShouldReturnJmxIpPort() {
+		System.setProperty("com.sun.management.jmxremote.port", "1337");
+		assertThat(MBeans.getJmxIpPort().matches("[0-9]+.[0-9]+.[0-9]+.[0-9]+:1337"), is(true));
 	}
 
 	@After
