@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/marccarre/commons-jmx.svg?branch=master)](https://travis-ci.org/marccarre/commons-jmx)
+[![Coverage Status](https://coveralls.io/repos/github/marccarre/commons-jmx/badge.svg?branch=master)](https://coveralls.io/github/marccarre/commons-jmx?branch=master)
+
 # commons-jmx
 
 Library of utilities to assist with developing applications monitored via JMX.
