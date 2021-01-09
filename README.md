@@ -1,19 +1,19 @@
-commons-jmx
-===========
+[![Build Status](https://travis-ci.org/marccarre/commons-jmx.svg?branch=master)](https://travis-ci.org/marccarre/commons-jmx)
+[![Coverage Status](https://coveralls.io/repos/github/marccarre/commons-jmx/badge.svg?branch=master)](https://coveralls.io/github/marccarre/commons-jmx?branch=master)
+
+# commons-jmx
 
 Library of utilities to assist with developing applications monitored via JMX.
 
+## Features
 
----
-**Features**:
 - `MBeans` helper allow you to easily register/unregister MBeans.
 - Use the builder to easily and transparently customize the MBeans' names.
 - Decorators to easily expose the state of your collections (maps, queues) via JMX:
   - current size
   - current items (using `toString()` to convert all items, keys, values to something understandable for JMX)
 
---- 
-**Examples**:
+## Examples
 
 1. Register a MBean:
 
